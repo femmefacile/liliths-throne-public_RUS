@@ -1,0 +1,31 @@
+
+name: Build Russian Game
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build game
+        run: mvn -B -DskipTests package
+
+      - name: Archive game
+        shell: pwsh
+        run: |
+          $dir = "target/Lilith's Throne (win)"
+          if (!(Test-Path $dir)) { throw "Build failed" }
+          Compress-Archive -Path "$dir/*" -DestinationPath "game.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LilithsThrone-RU
+          path: game.zip
